@@ -21,9 +21,12 @@ const TWITTER_HANDLE = 'kongtaoxing';
 const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
 
 window.chainLogo = {};
-window.chainId = await ethereum.request({method: 'eth_chainId'});
-window.network = networks[chainId];
-if (!network) chainLogo = ethLogo;
+let { ethereum } = window;
+if(ethereum) {
+  window.chainId = await ethereum.request({method: 'eth_chainId'});
+  window.network = networks[chainId];
+}
+if (!window.network) chainLogo = ethLogo;
 else if (network.includes("Optimism")) 
   chainLogo = opLogo;
 else if (network.includes("Arbitrum")) 
@@ -61,9 +64,7 @@ const App = () => {
 
 	const connectWallet = async () => {
 		try {
-			const {
-				ethereum
-			} = window;
+			const { ethereum } = window;
 
 			if (!ethereum) {
 				alert("Get MetaMask -> https://metamask.io/");
@@ -197,7 +198,7 @@ const App = () => {
           placeholder='Set record to Nova!'
           onChange={e => setRecord(e.target.value)}
         />
-          {/* If the editing variable is true, return the "Set record" and "Cancel" button */}
+          {/* If the editing variable is true, return the "Set record" and "Cancel" button */}    
           {editing ? (
             <div className="button-container">
               {/* This will call the updateDomain function we just made */}
@@ -213,7 +214,7 @@ const App = () => {
             // If editing is not true, the mint button will be returned instead
             <button className='cta-button mint-button' disabled={loading} onClick={mintDomain}>
               Mint
-            </button>  
+            </button> 
           )}
       </div>
 		);
@@ -254,8 +255,7 @@ const App = () => {
 		console.log("Editing record for", name);
 		setEditing(true);
 		setDomain(name);
-	}
-
+  }
 	const mintDomain = async () => {
 		// Don't run if the domain is empty
 		if (!domain) {
@@ -370,10 +370,10 @@ const App = () => {
 		}
 	}
 	useEffect(() => {
-		if (network === 'Optimism Goerli') {
+		if (window.network === 'Optimism Goerli') {
 			fetchMints();
 		}
-	}, [currentAccount, network]);
+	}, [currentAccount, window.network]);
 
 	const setData = async () => {
 		try {
