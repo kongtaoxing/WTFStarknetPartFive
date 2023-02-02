@@ -1,17 +1,13 @@
 import React, { useEffect, useState } from 'react';
+import {
+  type ConnectOptions,
+  type DisconnectOptions,
+  connect,
+  disconnect,
+} from "@starknet/get-starknet";
 import './styles/App.css';
 import { ethers } from "ethers";
-import polygonLogo from './assets/polygonlogo.png';
 import ethLogo from './assets/ethlogo.png';
-import opLogo from './assets/Optimism.png';
-import arbiLogo from './assets/Arbitrum.png';
-import avaxLogo from './assets/Avax.png';
-import xdaiLogo from './assets/gnosis.svg';
-import moonLogo from './assets/Moonbeam.svg';
-import hecoLogo from './assets/Heco.png';
-import oktLogo from './assets/OKT.png';
-import ftmLogo from './assets/Fantom.png';
-import bscLogo from './assets/Binance.png';
 import twitterLogo from './assets/twitter-logo.svg';
 import contractAbi from './utils/contractABI.json';
 import { networks } from './utils/networks.js';
@@ -26,29 +22,8 @@ if(ethereum) {
   window.chainId = await ethereum.request({method: 'eth_chainId'});
   window.network = networks[chainId];
 }
-if (!window.network) chainLogo = ethLogo;
-else if (network.includes("Optimism")) 
-  chainLogo = opLogo;
-else if (network.includes("Arbitrum")) 
-  chainLogo = arbiLogo;
-else if (network.includes("Avalanche")) 
-  chainLogo = avaxLogo;
-else if (network.includes("Polygon")) 
-  chainLogo = polygonLogo;
-else if (network.includes("xdai") || network.includes("Gnosis"))
-  chainLogo = xdaiLogo;
-else if (network.includes("Moonbeam"))
-  chainLogo = moonLogo;
-else if (network.includes("Binance")) 
-  chainLogo = bscLogo;
-else if (network.includes("Heco")) 
-  chainLogo = hecoLogo;
-else if (network.includes("OKeX")) 
-  chainLogo = oktLogo;
-else if (network.includes("Fantom")) 
-  chainLogo = ftmLogo;
-  
-else chainLogo = ethLogo;  //Unknown network
+chainLogo = ethLogo;
+
 // contract info
 const tld = '.nova';
 const CONTRACT_ADDRESS = '0xe86fB378d3F703D5C1322C7aBa1EB752be9D0D8A';
@@ -62,27 +37,20 @@ const App = () => {
 	const [record, setRecord] = useState('');
 	const [mints, setMints] = useState([]);
 
-	const connectWallet = async () => {
-		try {
-			const { ethereum } = window;
+  function handleConnect(options?: ConnectOptions) {
+    return async () => {
+      const res = await connect(options)
+      console.log(res)
+      // setWalletName(res?.name || "")
+    }
+  }
 
-			if (!ethereum) {
-				alert("Get MetaMask -> https://metamask.io/");
-				return;
-			}
-
-			// Fancy method to request access to account.
-			const accounts = await ethereum.request({
-				method: "eth_requestAccounts"
-			});
-
-			// Boom! This should print out public address once we authorize Metamask.
-			console.log("Connected", accounts[0]);
-			setCurrentAccount(accounts[0]);
-		} catch (error) {
-			console.log(error)
-		}
-	}
+  function handleDisconnect(options?: DisconnectOptions) {
+    return async () => {
+      await disconnect(options)
+      // setWalletName("")
+    }
+  }
 
 	const switchNetwork = async () => {
 		if (window.ethereum) {
@@ -163,9 +131,13 @@ const App = () => {
 	// Create a function to render if wallet is not connected yet
 	const renderNotConnectedContainer = () => (
 		<div className="connect-wallet-container">
-      <img src="./src/nova.gif" alt="Nova gif" />
-      <button className="cta-button connect-wallet-button" onClick={connectWallet}>
-        Connect Wallet
+      <img src="./src/WTF.png" alt="WTF png" />
+      <br></br>
+      <button className="cta-button connect-wallet-button" onClick={handleConnect({
+            modalMode: "alwaysAsk",
+            modalTheme: "dark",
+          })}>
+        链接钱包
       </button>
     </div>
 	);
@@ -425,13 +397,13 @@ const App = () => {
 				<div className="header-container">
   <header>
     <div className="left">
-      <p className="title">✨ Nova Name Service</p>
-              <p className="subtitle">THe NNS is a portal to the Web3 world!</p>
+      <p className="title">✨ 证书领取</p><br></br>
+      <p className="subtitle">恭喜你，通过WTF Cairo 入门测试，快连接钱包领取证书吧！</p>
     </div>
     {/* Display a logo and wallet connection status*/}
     <div className="right">
       <img alt="Network logo" className="logo" src={chainLogo} />
-      { currentAccount ? <p> Wallet: {currentAccount.slice(0, 6)}...{currentAccount.slice(-4)}</p> : <p> Not connected </p> }
+      { currentAccount ? <p> Wallet: {currentAccount.slice(0, 6)}...{currentAccount.slice(-4)}</p> : <p> 未连接 </p> }
     </div>
   </header>
 </div>

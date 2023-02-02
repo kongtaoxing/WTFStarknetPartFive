@@ -7,12 +7,15 @@
     "serve": "vite preview"
   },
   "dependencies": {
+    "@starknet-react/core": "^0.14.8",
+    "@starknet/get-starknet": "^1.5.1",
     "@types/react": "^17.0.13",
     "@types/react-dom": "^17.0.8",
+    "@vitejs/plugin-react": "^2.0.0",
     "ethers": "^5.5.4",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
-    "vite": "^3.0.4",
-    "@vitejs/plugin-react": "^2.0.0"
+    "starknet": "^4.17.1",
+    "vite": "^3.0.4"
   }
 }
