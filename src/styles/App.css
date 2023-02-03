@@ -94,17 +94,17 @@ header{
     to right,
     #ff8177 0%,
     #ff867a 0%,
-    #ff8c7f 21%,
-    #f99185 52%,
-    #cf556c 78%,
-    #b12a5b 100%
+    #fd483c 21%,
+    #d6423b 52%,
+    #a93b39 78%,
+    #612e36 100%
   );
   background-size: 200% 200%;
   animation: gradient-animation 4s ease infinite;
 }
 
 .switch-button {
-  background: -webkit-linear-gradient(left, #d60000, #ff7070);
+  background: -webkit-linear-gradient(left, #fd483c, #ff7070);
   font-size: 18px;
   background-size: 200% 200%;
   animation: gradient-animation 4s ease infinite;
@@ -114,7 +114,7 @@ header{
 }
 
 .mint-button {
-  background: -webkit-linear-gradient(left, #d60000, #ff7070);
+  background: -webkit-linear-gradient(left, #fd483c, #ff7070);
   font-size: 18px;
   background-size: 200% 200%;
   animation: gradient-animation 4s ease infinite;
@@ -124,7 +124,7 @@ header{
 }
 
 .mint-button:disabled{
-  background: #550072;
+  background: #fd483c;
   color: rgb(209, 209, 209);
   cursor: not-allowed;
 }
