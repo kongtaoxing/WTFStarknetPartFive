@@ -6,7 +6,7 @@ import {
   connect,
   disconnect,
 } from "get-starknet";
-import { stark, uint256, AccountInterface } from "starknet"
+import { stark, uint256, AccountInterface, constants } from "starknet"
 import './styles/App.css';
 import ethLogo from './assets/ethlogo.png';
 import twitterLogo from './assets/twitter-logo.svg';
@@ -49,22 +49,14 @@ const App = () => {
     setConnected(connected => {return false})
   }
 
-  const chainId = (): Network | undefined => {
-    const starknet = connect();
-    if (!starknet?.isConnected) {
-      return
+  async function chainId(id) {
+    if (id === constants.StarknetChainId.MAINNET) {
+      return "mainnet-alpha"
+    } else if (id === constants.StarknetChainId.TESTNET) {
+      return "goerli-alpha"
+    } else {
+      return "localhost"
     }
-    try {
-      const { chainId } = starknet.provider
-      console.log('chainId',chainId)
-      if (chainId === constants.StarknetChainId.MAINNET) {
-        return "mainnet-alpha"
-      } else if (chainId === constants.StarknetChainId.TESTNET) {
-        return "goerli-alpha"
-      } else {
-        return "localhost"
-      }
-    } catch {}
   }
   
   const handleConnectClick = async () => {
@@ -73,7 +65,8 @@ const App = () => {
       if (wallet?.account) {
         setAccount(account => { return wallet.account })
         setCurrentAccount(currentAccount => { return wallet.account.address; })
-        setChain(chain => { return chainId(); })
+        let chainName = await chainId(wallet?.provider.chainId);
+        setChain(() => { return chainName; });
         setConnected(connected => {return !!wallet?.isConnected})
         console.log('current account:', currentAccount)
       }
@@ -97,7 +90,7 @@ const App = () => {
 
 	// Form to enter domain name and data
 	const renderInputForm = () => {
-		if (chain == 'goerli-alpha') {
+		if (chain !== 'goerli-alpha') {
       console.log('chain:', chain)
 			return (
 				<div className="connect-wallet-container">
@@ -138,6 +131,7 @@ const App = () => {
 	}
 
   const claimNFT = async () => {
+    console.log(chain)
     try {
       const uint = uint256.bnToUint256(ethers.utils.parseEther(value)._hex);
       const callTx = account.execute([{
