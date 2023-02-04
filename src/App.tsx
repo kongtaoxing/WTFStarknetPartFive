@@ -42,10 +42,11 @@ const App = () => {
   }
 
   const handleDisconnect = async () => {
-    return async () => {
-      await disconnect({ clearLastWallet: true })
-      setWalletName("")
-    }
+    await disconnect({ clearLastWallet: true });
+    setAccount(account => { return null })
+    setCurrentAccount(currentAccount => { return ""; })
+    setChain(chain => { return "localhost"; })
+    setConnected(connected => {return false})
   }
 
   const chainId = (): Network | undefined => {
@@ -177,7 +178,7 @@ const App = () => {
     {/* Display a logo and wallet connection status*/}
     <div className="right">
       <img alt="Network logo" className="logo" src={chainLogo} />
-      { currentAccount ? <button onClick = {handleDisconnect}> Wallet: {currentAccount.slice(0, 6)}...{currentAccount.slice(-4)}</button> : <p> Not Connected </p> }
+      { currentAccount ? <button onClick = {handleDisconnect} className = 'ru-button'> Wallet: {currentAccount.slice(0, 6)}...{currentAccount.slice(-4)}</button> : <p> Not Connected </p> }
     </div>
   </header>
 </div>
