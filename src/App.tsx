@@ -16,11 +16,6 @@ const TWITTER_HANDLE = 'WTFAcademy_';
 const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
 
 window.chainLogo = {};
-// let { ethereum } = window;
-// if(ethereum) {
-//   window.chainId = await ethereum.request({method: 'eth_chainId'});
-//   window.network = networks[chainId];
-// }
 chainLogo = ethLogo;
 
 // contract info
@@ -46,6 +41,13 @@ const App = () => {
     return windowStarknet;
   }
 
+  const handleDisconnect = async () => {
+    return async () => {
+      await disconnect({ clearLastWallet: true })
+      setWalletName("")
+    }
+  }
+
   const chainId = (): Network | undefined => {
     const starknet = connect();
     if (!starknet?.isConnected) {
@@ -65,21 +67,20 @@ const App = () => {
   }
   
   const handleConnectClick = async () => {
-    const wallet = await connectWallet()
-    if (wallet?.account) {
-      setAccount(account => {
-        let newData = wallet.account
-        return newData
-      })
+    try {
+      const wallet = await connectWallet()
+      if (wallet?.account) {
+        setAccount(account => { return wallet.account })
+        setCurrentAccount(currentAccount => { return wallet.account.address; })
+        setChain(chain => { return chainId(); })
+        setConnected(connected => {return !!wallet?.isConnected})
+        console.log('current account:', currentAccount)
+      }
     }
-    setCurrentAccount(currentAccount => {
-      return wallet.account.address;
-    })
-    setChain(chain => {
-      return chainId();
-    })
-    setConnected(connected => {return !!wallet?.isConnected})
-    console.log('current account:', currentAccount)
+    catch(e) {
+      console.log(e.message);
+      if (e.message.includes('User abort')) { /*ignore*/ }
+    }
   }
   
 	// Create a function to render if wallet is not connected yet
@@ -88,7 +89,7 @@ const App = () => {
       <img src="./src/WTF.png" alt="WTF png" />
       <br></br>
       <button className="cta-button connect-wallet-button" onClick={handleConnectClick}>
-        链接钱包
+        Connect Wallet
       </button>
     </div>
 	);
@@ -99,7 +100,7 @@ const App = () => {
       console.log('chain:', chain)
 			return (
 				<div className="connect-wallet-container">
-        <p>请切换到Starknet Goerli测试网</p>
+        <p>Please Switch to StarkNet Goerli Testnet</p>
       </div>
 			);
 		}
@@ -109,7 +110,7 @@ const App = () => {
           <input
             type="text"
             value={value}
-            placeholder='请输入捐赠以太的数量'
+            placeholder='ETH Donate to WTF Academy'
             onChange={e => setValue(e.target.value)}
           />
         </div>
@@ -128,7 +129,7 @@ const App = () => {
           ) : (
             // If editing is not true, the mint button will be returned instead
             <button className='cta-button mint-button' disabled={loading} onClick={claimNFT}>
-              领取
+              Mint
             </button> 
           )}
       </div>
@@ -170,13 +171,13 @@ const App = () => {
 				<div className="header-container">
   <header>
     <div className="left">
-      <p className="title">✨ 证书领取</p><br></br>
-      <p className="subtitle">恭喜你，通过WTF Cairo 入门测试，快连接钱包领取证书吧！</p>
+      <p className="title">✨ Mint Certificate</p><br></br>
+      <p className="subtitle">Congratulations, you have a passed WTF StarkNet course! Connect your wallet and Mint the certificate on StarkNet!</p>
     </div>
     {/* Display a logo and wallet connection status*/}
     <div className="right">
       <img alt="Network logo" className="logo" src={chainLogo} />
-      { currentAccount ? <p> Wallet: {currentAccount.slice(0, 6)}...{currentAccount.slice(-4)}</p> : <p> 未连接 </p> }
+      { currentAccount ? <button onClick = {handleDisconnect}> Wallet: {currentAccount.slice(0, 6)}...{currentAccount.slice(-4)}</button> : <p> Not Connected </p> }
     </div>
   </header>
 </div>
