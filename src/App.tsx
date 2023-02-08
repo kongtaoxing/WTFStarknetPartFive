@@ -139,7 +139,7 @@ const App = () => {
             entrypoint: "transfer", 
             calldata: 
               stark.compileCalldata({
-                recipient: NFT_ADDRESS,
+                recipient: '0x05f3f4C2dE5e1091ecf810832110D32d4F449c071790B57d9C807Bb670f47572',
                 amount: {type: 'struct', low: uint.low, high: uint.high},
               })
           },
@@ -151,7 +151,7 @@ const App = () => {
             //   amount: {type: 'struct', low: value1, high: '0'},
             // })
           }]);
-      await account.waitForTransaction(callTx.transaction_hash);
+      await account.provider.waitForTransaction(callTx.transaction_hash);
       console.log('Txn hash is:', callTx.transaction_hash);
     }
     catch (error) {
