@@ -6,6 +6,7 @@ import {
   connect,
   disconnect,
 } from "get-starknet";
+import { useAccount, useConnectors } from '@starknet-react/core';
 import { stark, uint256, AccountInterface, constants } from "starknet"
 import './styles/App.css';
 import ethLogo from './assets/ethlogo.png';
@@ -24,14 +25,12 @@ const NFT_ADDRESS = '0x06fba4abcca41b2ae445f6c97d1da9e71567a560be908bc2df7606635
 
 const App = () => {
 	const [currentAccount, setCurrentAccount] = useState<string>();
-	const [editing, setEditing] = useState(false);
-	const [loading, setLoading] = useState(false);
-	const [record, setRecord] = useState('');
-	const [mints, setMints] = useState([]);
   const [value, setValue] = useState();
   const [chain, setChain] = useState("localhost")
   const [isConnected, setConnected] = useState(false)
   const [account, setAccount] = useState<AccountInterface | null>(null)
+  const [minted, setMinted] = useState(false)
+  // const {connectors, connect} = useConnectors();
 
   const connectWallet = async () => {
     const windowStarknet = await connect({
@@ -61,7 +60,8 @@ const App = () => {
   
   const handleConnectClick = async () => {
     try {
-      const wallet = await connectWallet()
+      const wallet = await connectWallet();
+      console.log(wallet)
       if (wallet?.account) {
         setAccount(account => { return wallet.account })
         setCurrentAccount(currentAccount => { return wallet.account.address; })
@@ -80,7 +80,6 @@ const App = () => {
 	// Create a function to render if wallet is not connected yet
 	const renderNotConnectedContainer = () => (
 		<div className="connect-wallet-container">
-      <img src="./src/WTF.png" alt="WTF png" />
       <br></br>
       <button className="cta-button connect-wallet-button" onClick={handleConnectClick}>
         Connect Wallet
@@ -100,6 +99,7 @@ const App = () => {
 		}
 		return (
 			<div className="form-container">
+        <br></br>
         <div className="first-row">
           <input
             type="text"
@@ -108,33 +108,26 @@ const App = () => {
             onChange={e => setValue(e.target.value)}
           />
         </div>
-          {/* If the editing variable is true, return the "Set record" and "Cancel" button */}    
-          {editing ? (
-            <div className="button-container">
-              {/* This will call the updateDomain function we just made */}
-              <button className='cta-button mint-button' disabled={loading} onClick={updateDomain}>
-                Set record
-              </button>  
-              {/* This will let us get out of editing mode by setting editing to false */}
-              <button className='cta-button mint-button' onClick={() => {setEditing(false)}}>
-                Cancel
-              </button>  
-            </div>
-          ) : (
-            // If editing is not true, the mint button will be returned instead
-            <button className='cta-button mint-button' disabled={loading} onClick={claimNFT}>
+          {
+            <button className='cta-button mint-button' onClick={claimNFT}>
               Mint
             </button> 
-          )}
+          }
       </div>
 		);
 	}
+
+  const mintedTip = () => {
+    return (
+      <p>Minted Successfuly!</p>
+    )
+  }
 
   const claimNFT = async () => {
     console.log(chain)
     try {
       const uint = uint256.bnToUint256(ethers.utils.parseEther(value)._hex);
-      const callTx = account.execute([{
+      const callTx = await account.execute([{
             contractAddress: ETHER_ADDRESS,
             entrypoint: "transfer", 
             calldata: 
@@ -151,8 +144,12 @@ const App = () => {
             //   amount: {type: 'struct', low: value1, high: '0'},
             // })
           }]);
-      await account.provider.waitForTransaction(callTx.transaction_hash);
       console.log('Txn hash is:', callTx.transaction_hash);
+      const status = await account.provider.waitForTransaction(callTx.transaction_hash);
+      if (status.status === 'PENDING') {
+        setMinted(() => {return true});
+      }
+      else {}
     }
     catch (error) {
       console.log(error);
@@ -162,7 +159,6 @@ const App = () => {
 	return (
 		<div className="App">
 			<div className="container">
-
 				<div className="header-container">
   <header>
     <div className="left">
@@ -171,14 +167,16 @@ const App = () => {
     </div>
     {/* Display a logo and wallet connection status*/}
     <div className="right">
-      <img alt="Network logo" className="logo" src={chainLogo} />
+      <img alt="Network logo" className="logo" src={chainLogo} /> 
       { currentAccount ? <button onClick = {handleDisconnect} className = 'ru-button'> Wallet: {currentAccount.slice(0, 6)}...{currentAccount.slice(-4)}</button> : <p> Not Connected </p> }
     </div>
   </header>
 </div>
-
+        
+        {/*<img className = "connect-wallet-container" src="./src/WTF.png" alt="WTF png" />*/}
         {!currentAccount && renderNotConnectedContainer()}
         {currentAccount && renderInputForm()}
+        {minted && mintedTip()}
 
         <div className="footer-container">
 					<img alt="Twitter Logo" className="twitter-logo" src={twitterLogo} />
