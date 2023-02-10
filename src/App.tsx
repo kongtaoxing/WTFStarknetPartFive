@@ -1,15 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { ethers } from "ethers";
-import {
-  type ConnectOptions,
-  type DisconnectOptions,
-  connect,
-  disconnect,
-} from "get-starknet";
 import { stark, uint256, AccountInterface, constants } from "starknet"
 import './styles/App.css';
 import ethLogo from './assets/ethlogo.png';
 import twitterLogo from './assets/twitter-logo.svg';
+import { useConnectors, useAccount, useNetwork } from '@starknet-react/core';
 
 // Constants
 const TWITTER_HANDLE = 'WTFAcademy_';
@@ -23,74 +18,32 @@ const ETHER_ADDRESS = '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82
 const NFT_ADDRESS = '0x06fba4abcca41b2ae445f6c97d1da9e71567a560be908bc2df7606635c9057f8';
 
 const App = () => {
-	const [currentAccount, setCurrentAccount] = useState<string>();
 	const [editing, setEditing] = useState(false);
 	const [loading, setLoading] = useState(false);
 	const [record, setRecord] = useState('');
 	const [mints, setMints] = useState([]);
   const [value, setValue] = useState();
-  const [chain, setChain] = useState("localhost")
-  const [isConnected, setConnected] = useState(false)
-  const [account, setAccount] = useState<AccountInterface | null>(null)
 
-  const connectWallet = async () => {
-    const windowStarknet = await connect({
-      modalMode: "alwaysAsk"
-    })
-    await windowStarknet?.enable({ starknetVersion: "v4" } as any)
-    return windowStarknet;
-  }
+  const { connect, connectors, disconnect, available, refresh } = useConnectors()
+  const { account, address, status } = useAccount()
+  const { chain } = useNetwork()
 
-  const handleDisconnect = async () => {
-    await disconnect({ clearLastWallet: true });
-    setAccount(account => { return null })
-    setCurrentAccount(currentAccount => { return ""; })
-    setChain(chain => { return "localhost"; })
-    setConnected(connected => {return false})
-  }
-
-  async function chainId(id) {
-    if (id === constants.StarknetChainId.MAINNET) {
-      return "mainnet-alpha"
-    } else if (id === constants.StarknetChainId.TESTNET) {
-      return "goerli-alpha"
-    } else {
-      return "localhost"
-    }
-  }
-  
-  const handleConnectClick = async () => {
-    try {
-      const wallet = await connectWallet()
-      if (wallet?.account) {
-        setAccount(account => { return wallet.account })
-        setCurrentAccount(currentAccount => { return wallet.account.address; })
-        let chainName = await chainId(wallet?.provider.chainId);
-        setChain(() => { return chainName; });
-        setConnected(connected => {return !!wallet?.isConnected})
-        console.log('current account:', currentAccount)
-      }
-    }
-    catch(e) {
-      console.log(e.message);
-      if (e.message.includes('User abort')) { /*ignore*/ }
-    }
-  }
-  
 	// Create a function to render if wallet is not connected yet
 	const renderNotConnectedContainer = () => (
 		<div className="connect-wallet-container">
       <img src="./src/WTF.png" alt="WTF png" />
       <br></br>
-      <button className="cta-button connect-wallet-button" onClick={handleConnectClick}>
-        Connect Wallet
-      </button>
+      {connectors.map((connector) => (
+        <button className="cta-button connect-wallet-button" key={connector.id()} onClick={() => connect(connector)}>
+          Connect {connector.id()}
+        </button>
+      ))}
     </div>
 	);
 
 	// Form to enter domain name and data
 	const renderInputForm = () => {
-		if (chain !== 'goerli-alpha') {
+		if (chain.name !== 'StarkNet Görli') {
       console.log('chain:', chain)
 			return (
 				<div className="connect-wallet-container">
@@ -172,13 +125,13 @@ const App = () => {
     {/* Display a logo and wallet connection status*/}
     <div className="right">
       <img alt="Network logo" className="logo" src={chainLogo} />
-      { currentAccount ? <button onClick = {handleDisconnect} className = 'ru-button'> Wallet: {currentAccount.slice(0, 6)}...{currentAccount.slice(-4)}</button> : <p> Not Connected </p> }
+      { status == 'connected' ? <button onClick = {disconnect} className = 'ru-button'> Wallet: {address.slice(0, 6)}...{address.slice(-4)}</button> : <p> Not Connected </p> }
     </div>
   </header>
 </div>
 
-        {!currentAccount && renderNotConnectedContainer()}
-        {currentAccount && renderInputForm()}
+        {!(status == 'connected') && renderNotConnectedContainer()}
+        {(status == 'connected') && renderInputForm()}
 
         <div className="footer-container">
 					<img alt="Twitter Logo" className="twitter-logo" src={twitterLogo} />
