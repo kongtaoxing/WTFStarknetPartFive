@@ -28,15 +28,22 @@ const App = () => {
   const { account, address, status } = useAccount()
   const { chain } = useNetwork()
 
+  useEffect(() => {
+    const interval = setInterval(refresh, 5000)
+    return () => clearInterval(interval)
+  }, [refresh])
+
 	// Create a function to render if wallet is not connected yet
 	const renderNotConnectedContainer = () => (
 		<div className="connect-wallet-container">
       <img src="./src/WTF.png" alt="WTF png" />
       <br></br>
-      {connectors.map((connector) => (
+      {available.map((connector) => (
+        <li key={connector.id()}>
         <button className="cta-button connect-wallet-button" key={connector.id()} onClick={() => connect(connector)}>
           Connect {connector.id()}
         </button>
+        </li>
       ))}
     </div>
 	);
